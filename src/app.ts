@@ -3,6 +3,7 @@ import initDB from './config/db';
 import logger from './middlewere/loger';
 import { userRoute } from './modules/users/user.route';
 import { authRoutes } from './modules/auth/auth.route';
+import { vehicleroute } from './modules/vehicles/vehicles.route';
 const app = express()
 
 
@@ -19,6 +20,8 @@ app.get('/', logger,(req:Request, res:Response) => {
 app.use('/api/v1/users', userRoute)
 
 app.use("/api/v1/auth", authRoutes)
+
+app.use("/api/v1/vehicles", vehicleroute)
 
 app.get("/", (req, res) => {
   res.send("Server is running...");
