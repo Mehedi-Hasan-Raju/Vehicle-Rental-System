@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express"
 import { authServices } from "./auth.service"
 
 const loginUser = async function (req: Request, res: Response) {
-    const { email, password } = req.body;
+    const { email, password} = req.body;
 
         try{
             const result = await authServices.loginUser(email, password);
