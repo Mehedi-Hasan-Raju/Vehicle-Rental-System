@@ -1,6 +1,7 @@
 import { Router } from "express";
 import auth from "../../middlewere/auth";
 import { bookingControllers } from "./booking.controller";
+import { vehicleControllers } from "../vehicles/vehicles.controller";
 
 const router = Router();
 
@@ -20,6 +21,12 @@ router.put(
     "/:bookingId",
     auth("admin", "customer"),
     bookingControllers.updateBooking
+);
+
+router.delete(
+    "/:vehicleId",
+    auth("admin"),
+    vehicleControllers.deleteVehicle
 );
 
 export const bookingsroute = router;

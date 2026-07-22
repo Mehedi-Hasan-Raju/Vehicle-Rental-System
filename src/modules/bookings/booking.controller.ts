@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { bookingServices } from "./bookings.service"; 
+import { vehicleServices } from "../vehicles/vehicles.services";
 
 const createBooking = async (req: Request, res: Response) => {
   try {
@@ -82,6 +83,35 @@ const updateBooking = async (
   }
 };
 
+
+const deleteVehicle = async (req: Request, res: Response) => {
+
+    try{
+
+        const {vehicleId} = req.params;
+
+        const result = await vehicleServices.deleteVehicle(vehicleId as string);
+
+        res.status(200).json({
+            success:true,
+            message:"Vehicle deleted successfully",
+            data:result.rows[0]
+        });
+
+    }catch(err:any){
+
+        res.status(500).json({
+            success:false,
+            message:err.message
+        });
+
+    }
+
+}
+
 export const bookingControllers = {
-  createBooking,getBookings,updateBooking
+  createBooking,
+  getBookings,
+  updateBooking,
+  deleteVehicle,
 };
