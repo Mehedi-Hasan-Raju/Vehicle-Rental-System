@@ -66,20 +66,20 @@ const updateVehicle = async (req: Request, res: Response) => {
     const { vehicleId } = req.params;
 
     const {
-      name,
+      vehicle_name,
       type,
       registration_number,
       daily_rent_price,
-      availability,
+      availability_status,
     } = req.body;
 
     const result = await vehicleServices.updateVehicle(
       vehicleId as string,
-      name,
+      vehicle_name,
       type,
       registration_number,
       daily_rent_price,
-      availability
+      availability_status
     );
 
     res.status(200).json({
