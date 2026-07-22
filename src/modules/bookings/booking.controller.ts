@@ -31,6 +31,57 @@ const createBooking = async (req: Request, res: Response) => {
   }
 };
 
+const getBookings = async (req: Request, res: Response) => {
+  try {
+    const result = await bookingServices.getBookings(req.user);
+
+    res.status(200).json({
+      success: true,
+      message: "Bookings retrieved successfully",
+      data: result.rows,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+const updateBooking = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const bookingId = Array.isArray(req.params.bookingId)
+      ? req.params.bookingId[0]
+      : req.params.bookingId;
+
+    if (!bookingId) {
+      return res.status(400).json({
+        success: false,
+        message: "Booking ID is required",
+      });
+    }
+
+    const result = await bookingServices.updateBooking(
+      bookingId,
+      req.user
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Booking updated successfully",
+      data: result.rows[0],
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 export const bookingControllers = {
-  createBooking,
+  createBooking,getBookings,updateBooking
 };

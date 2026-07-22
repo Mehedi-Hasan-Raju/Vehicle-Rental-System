@@ -15,7 +15,7 @@
         throw new Error("Invalid credentials");
      }
      
-     const token =  jwt.sign({name: user.name,role: user.role, email: user.email},config.jwtSecret as string, {
+     const token =  jwt.sign({id: user.id, name: user.name,role: user.role, email: user.email},config.jwtSecret as string, {
         expiresIn: "7d",
      });
      console.log({token})

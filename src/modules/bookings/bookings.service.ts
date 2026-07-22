@@ -91,6 +91,133 @@ const createBooking = async (
   }
 };
 
+
+const getBookings = async (user: any) => {
+  if (user.role === "admin") {
+    const result = await pool.query(`SELECT * FROM bookings`);
+    return result;
+  }
+
+  const result = await pool.query(
+    `SELECT * FROM bookings WHERE customer_id = $1`,
+    [user.id]
+  );
+
+  return result;
+};
+
+
+const updateBooking = async (
+  bookingId: string,
+  user: any
+) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const bookingResult = await client.query(
+      `SELECT * FROM bookings WHERE id=$1`,
+      [bookingId]
+    );
+
+    if (bookingResult.rows.length === 0) {
+      throw new Error("Booking not found");
+    }
+
+    const booking = bookingResult.rows[0];
+
+    // Customer
+    if (user.role === "customer") {
+
+      if (booking.customer_id != user.id) {
+        throw new Error("Forbidden");
+      }
+
+      const today = new Date();
+      const startDate = new Date(booking.rent_start_date);
+
+      if (today >= startDate) {
+        throw new Error("Booking cannot be cancelled");
+      }
+
+      await client.query(
+        `UPDATE bookings
+         SET status='cancelled'
+         WHERE id=$1`,
+        [bookingId]
+      );
+
+      await client.query(
+        `UPDATE vehicles
+         SET availability_status='available'
+         WHERE id=$1`,
+        [booking.vehicle_id]
+      );
+    }
+
+    // Admin
+    if (user.role === "admin") {
+
+      await client.query(
+        `UPDATE bookings
+         SET status='returned'
+         WHERE id=$1`,
+        [bookingId]
+      );
+
+      await client.query(
+        `UPDATE vehicles
+         SET availability_status='available'
+         WHERE id=$1`,
+        [booking.vehicle_id]
+      );
+    }
+
+    await client.query("COMMIT");
+
+    return await client.query(
+      `SELECT * FROM bookings WHERE id=$1`,
+      [bookingId]
+    );
+
+  } catch (err) {
+
+    await client.query("ROLLBACK");
+    throw err;
+
+  } finally {
+
+    client.release();
+
+  }
+};
+
+
+const deleteVehicle = async (id: string) => {
+
+  // Check active booking
+  const booking = await pool.query(
+    `SELECT * FROM bookings
+     WHERE vehicle_id = $1
+     AND status = 'active'`,
+    [id]
+  );
+
+  if (booking.rows.length > 0) {
+    throw new Error("Vehicle has an active booking");
+  }
+
+  const result = await pool.query(
+    `DELETE FROM vehicles
+     WHERE id = $1
+     RETURNING *`,
+    [id]
+  );
+
+  return result;
+};
+
 export const bookingServices = {
-  createBooking,
+  createBooking,getBookings,updateBooking,deleteVehicle
 };
